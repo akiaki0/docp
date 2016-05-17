@@ -56,7 +56,23 @@ class DocpTableTest < DocpTestHelper
     tdoc = parse_table(:header_index)
     assert tdoc.rows.any?
     h = tdoc.rows[0].to_hash
-    puts h
     assert_equal h[:user_name], "user1"
+  end
+  
+  def test_duplicate_attributes
+    @header = set_header(:duplicate_attributes)
+    tdoc = parse_table(:duplicate_attributes)
+    table = tdoc.tables[0]
+    h = table.rows[0].to_hash
+    assert_equal table.header[:user_name][:class], "user_name,user_url"
+    assert_equal table.header[:user_url][:class], "user_name,user_url"
+    assert_equal h[:user_name], "user1"
+    assert h[:user_url].is_a?(Nokogiri::XML::Element)
+    
+    table = tdoc.tables[1]
+    h = table.rows[0].to_hash
+    assert_equal table.header[:company_name][:class], "company_name,company_url"
+    assert_equal h[:company_name], "company1"
+    assert h[:company_url].is_a?(Nokogiri::XML::Element)
   end
 end

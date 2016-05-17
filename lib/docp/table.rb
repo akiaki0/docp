@@ -66,12 +66,17 @@ module Docp
         row_tr = @this_table.add_child Nokogiri::XML::Element.new("tr", @doc)
         header_tr[:class] = "table-header"
         table.row_elements.each do|td|
-          if col = @header_parser.columns.find {|c| c.include_ptn?(td)}
-            cltd = td.clone
-            cltd[:class] = col.name
-            header_tr.add_child cltd.clone
+          @header_parser.columns.select {|c| c.include_ptn?(td)}.each do|col|
+            if td[:class]
+              td[:class] = "#{td[:class]},#{col.name}"
+              header_tr.row_elements.last[:class] = td[:class]
+            else
+              td[:class] = col.name
+              header_tr.add_child td.clone
+            end
+            
             if ntd = td.next_element
-              ntd[:class] = ntd[:class] ? "#{ntd[:class]},#{col.name}" : col.name
+              ntd[:class] = col.name
               row_tr.add_child ntd.clone
             else
               #raise "NextElementNotfound #{ntd.class} #{ntd}\n"

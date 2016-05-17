@@ -61,6 +61,25 @@ class DocpTestHelper < Minitest::Test
           end
         end
       end
+    when :duplicate_attributes
+      Docp::TableHeader.new do|h|
+        h.include_ptn = /user_name/, /company_name/
+        h.match_block do|h, match|
+          h.default_format = -> td { td.text.strip }
+          if match[:index] == 0 && match[:ptn] == /user_name/
+            h.add user_name: "user_name"
+            h.add user_url: "user_name", format: -> td { td.at('a') }
+            h.add user_id: "user_id"
+            h.add user_age: /age/, format: -> td { td.text.to_i }
+            h.add user_birthday: /birthday/, format: :to_date
+          elsif match[:index] == 1 && match[:ptn] == /company_name/
+            h.vertical = true
+            h.add company_name: "company_name"
+            h.add company_url: "company_name", format: -> td { td.at('a') }
+            h.add company_id: "company_id"
+          end
+        end
+      end
     when :header_count_not_match, nil
       Docp::TableHeader.new do|h|
         h.vertical = true if type == :vertical
@@ -132,6 +151,22 @@ class DocpTestHelper < Minitest::Test
            <tr><td>Spam user_name </td></tr>
            <tr><td>user_name</td><td>user_id</td></tr>
            <tr><td>user1</td><td>1</td></tr>
+        </table>
+      ",
+      duplicate_attributes: "
+        <table>
+            <tr>
+              <td>user_name</td><td>user_id</td><td>user_birthday</td><td>user_age</td>
+            </tr>
+            <tr>
+              <td>user1<a href='http://www.example.com'></a></td><td>1</td><td>2000/12/01</td><td>20</td>
+            </tr>
+        </table>
+        <table>
+            <tr>
+              <td>company_name</td><td>company1<a href='http://www.example.com'></a></td>
+              <td>company_id</td><td>1</td>
+            </tr>
         </table>
       "
       
