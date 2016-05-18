@@ -24,7 +24,7 @@ module Docp
       @required_attributes = []
       args.each {|k, v| send("#{k}=", v) }
       @default_format ||= :text
-      block.call(self, match)
+      block.call(self, match) if block_given?
       set_required_columns
     end
 
